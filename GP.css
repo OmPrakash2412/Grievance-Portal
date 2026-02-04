@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>NFSU – Grievance Portal</title>
+
+<style>
+/* ========== BASIC ========== */
+body {
+    margin: 0;
+    height: 100vh;
+    background: url("college.jpg.jpg.png") no-repeat center center fixed;
+    background-size: cover;
+    font-family: "Times New Roman", Times, serif;
+    overflow: hidden;
+}
+
+.overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+}
+
+/* ========== PAGE TRANSITIONS (FIXED LAG) ========== */
+.page {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transform: scale(1.015);
+    pointer-events: none;
+    transition: opacity 0.45s ease, transform 0.45s ease;
+    will-change: opacity, transform;
+}
+
+.page.active {
+    opacity: 1;
+    transform: scale(1);
+    pointer-events: auto;
+}
+
+/* ========== TOP LOGIN BUTTON ========== */
+.top-bar {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    z-index: 5;
+}
+
+.login-top {
+    position: relative;
+    overflow: hidden;
+
+    padding: 11px 32px;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+
+    background: rgba(255, 255, 255, 0.15);
+    color: #ff3b3b;
+
+    border: 1.5px solid rgba(255, 59, 59, 0.9);
+    border-radius: 10px;
+
+    backdrop-filter: blur(10px);
+    cursor: pointer;
+
+    transition: all 0.35s ease;
+}
+
+/* ✨ Shimmer sweep */
+.login-top::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -120%;
+    width: 120%;
+    height: 100%;
+    background: linear-gradient(
+        120deg,
+        transparent,
+        rgba(255,255,255,0.4),
+        transparent
+    );
+    animation: shimmer 3.2s infinite;
+}
+
+/* Hover – red fill */
+.login-top:hover {
+    background: rgba(255, 59, 59, 0.9);
+    color: white;
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 12px 30px rgba(255, 59, 59, 0.6);
+}
+
+/* Pause shimmer on hover */
+.login-top:hover::before {
+    animation-play-state: paused;
+}
+
+/* Click ripple */
+.login-top:active {
+    transform: scale(0.96);
+}
+
+/* Keyframes */
+@keyframes shimmer {
+    0% { left: -120%; }
+    100% { left: 120%; }
+}
+
+
+/* ========== HAMBURGER ========== */
+.hamburger {
+    position: absolute;
+    top: 20px;
+    left: 25px;
+    font-size: 28px;
+    color: white;
+    cursor: pointer;
+    display: none;
+    z-index: 11;
+}
+
+/* ========== MENU OVERLAY ========== */
+.menu-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.35);
+    display: none;
+    z-index: 9;
+}
+
+/* ========== PROFILE PANEL ========== */
+.profile-panel {
+    position: fixed;
+    top: 0;
+    left: -260px;
+    width: 260px;
+    height: 100vh;
+    background: white;
+    padding-top: 80px;
+    text-align: center;
+    transition: 0.4s ease;
+    z-index: 10;
+}
+
+.profile-panel.active { left: 0; }
+
+.profile-pic {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    background: #ddd;
+    margin: auto;
+    overflow: hidden;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 40px;
+}
+
+.profile-pic img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.display-name {
+    margin-top: 15px;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+}
+
+.edit-icon {
+    cursor: pointer;
+    font-size: 14px;
+}
+
+#nameInput {
+    display: none;
+    margin: 10px auto;
+    padding: 6px;
+    width: 80%;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    text-align: center;
+}
+
+.profile-panel p {
+    margin-top: 15px;
+    font-weight: bold;
+}
+
+.profile-option {
+    margin: 18px 0;
+    cursor: pointer;
+    font-weight: bold;
+    color: #333;
+}
+
+.profile-option:hover { color: red; }
+
+.profile-panel hr {
+    width: 80%;
+    border: none;
+    border-top: 1px solid #ddd;
+    margin: 15px auto;
+}
+
+.logout {
+    margin-top: 20px;
+    color: red;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+/* ========== HOME ========== */
+.home-container {
+    position: relative;
+    z-index: 2;
+    color: white;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.logo { width: 130px; }
+
+.nfsu-text {
+    font-size: 3em;
+    font-weight: 900;
+    color: gold;
+}
+
+.campus-text {
+    margin-top: 10px;
+    font-size: 1.8em;
+    font-weight: bold;
+    background: red;
+    padding: 6px 24px;
+    border-radius: 30px;
+}
+
+.animated-text {
+    margin-top: 30px;
+    font-size: 1.6em;
+    animation: fadeText 6s infinite;
+}
+
+@keyframes fadeText {
+    0% { opacity: 0; }
+    20% { opacity: 1; }
+    60% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+/* ===== ABOUT WEBSITE AND ISSUE ===== */
+.about-website {
+    margin-top: 18px;
+    padding: 12px 26px;
+    background: rgba(255, 215, 0, 0.25);
+    color: gold;
+    font-weight: bold;
+    border-radius: 30px;
+    box-shadow: 0 0 28px rgba(255, 215, 0, 1);
+    cursor: pointer;
+    transition: 0.3s ease;
+    font-size: 20px;
+    animation: glowPulse 2s infinite alternate;
+}
+
+.about-website:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 38px rgba(255, 215, 0, 1);
+}
+
+@keyframes glowPulse {
+    0% { box-shadow: 0 0 20px rgba(255, 215, 0, 0.8); }
+    100% { box-shadow: 0 0 35px rgba(255, 215, 0, 1); }
+}
+
+.facing-issue {
+    margin-top: 12px;
+    font-size: 18px;
+    color: #ffd700;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+/* ========== LOGIN / GLASS FIX ========== */
+.login-page,
+.dashboard-page,
+.dev-page,
+.raise-problem-page,
+.problem-success-page,
+.raised-problems-page,
+.problem-detail-page {
+    will-change: opacity, transform;
+}
+
+.login-page {
+    height: 100vh;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding-right: 80px;
+}
+
+.glass-box {
+    width: 400px;
+    padding: 45px;
+    border-radius: 18px;
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 0 25px rgba(255,0,0,0.35);
+}
+
+.glass-box h2 {
+    color: white;
+    text-align: center;
+}
+
+.glass-box input {
+    width: 100%;
+    padding: 14px;
+    margin: 12px 0;
+    border-radius: 8px;
+    border: none;
+}
+
+.forgot {
+    text-align: right;
+    color: #ffdcdc;
+    cursor: pointer;
+}
+
+.glass-box button {
+    width: 100%;
+    padding: 14px;
+    background: red;
+    color: white;
+    border-radius: 8px;
+    font-weight: bold;
+    border: none;
+    margin-top: 20px;
+}
+
+.back {
+    margin-top: 18px;
+    text-align: center;
+    color: #ffd6d6;
+    cursor: pointer;
+}
+
+/* ========== DASHBOARD ========== */
+.dashboard-page {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    perspective: 1200px;   /* stronger depth */
+}
+.dashboard-box {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    transform-style: preserve-3d;
+}
+
+.dash-card {
+    position: relative;
+    overflow: hidden;
+
+
+    width: 340px;
+    height: 85px;
+    border-radius: 18px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 1.4em;
+    font-weight: bold;
+    color: white;
+    cursor: pointer;
+
+    backdrop-filter: blur(14px);
+    background: rgba(255,255,255,0.12);
+
+    box-shadow: 0 10px 25px rgba(0,0,0,0.35);
+    transform-style: preserve-3d;
+
+    transition:
+        transform 0.35s ease,
+        box-shadow 0.35s ease,
+        filter 0.35s ease;
+
+}
+
+/* shimmer */
+
+.dash-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -120%;
+    width: 120%;
+    height: 100%;
+    background: linear-gradient(
+        120deg,
+        transparent,
+        rgba(255,255,255,0.35),
+        transparent
+    );
+    animation: dashShimmer 3.8s infinite;
+    
+}
+
+/* hover */
+.dash-card:hover {
+    transform:
+        translateY(-14px)
+        scale(1.12)
+        rotateX(6deg)
+        translateZ(60px);
+
+    box-shadow:
+        0 35px 70px rgba(0,0,0,0.7),
+        0 0 35px rgba(255,255,255,0.35);
+
+    filter: brightness(1.15);
+}
+
+.raise:hover {
+    box-shadow:
+        0 35px 70px rgba(255,77,77,0.8),
+        0 0 35px rgba(255,77,77,0.6);
+}
+
+.raised:hover {
+    box-shadow:
+        0 35px 70px rgba(255, 0, 0, 0.8),
+        0 0 35px rgba(255, 0, 0, 0.6);
+}
+
+.solved:hover {
+    box-shadow:
+        0 35px 70px rgba(179, 60, 64, 0.8),
+        0 0 35px rgba(179, 60, 60, 0.6);
+}
+
+.discussion:hover {
+    box-shadow:
+        0 35px 70px rgba(255, 30, 30, 0.8),
+        0 0 35px rgba(255, 30, 30, 0.6);
+}
+
+
+
+/* pause shimmer on hover */
+.dash-card:hover::before {
+    animation-play-state: paused;
+}
+
+/* click */
+.dash-card:active {
+    transform: scale(1.02) translateZ(20px);
+}
+
+
+@keyframes dashShimmer {
+    0% { left: -120%; }
+    100% { left: 120%; }
+}
+/* ===== DASHBOARD STAGGERED ENTRY ===== */
+.dashboard-page .dash-card {
+    opacity: 0;
+    transform: translateY(24px);
+}
+
+/* When dashboard page becomes active */
+#dashboard.active .dash-card {
+    animation: dashEnter 0.6s ease forwards;
+}
+
+#dashboard.active .dash-card:nth-child(1) { animation-delay: 0.1s; }
+#dashboard.active .dash-card:nth-child(2) { animation-delay: 0.25s; }
+#dashboard.active .dash-card:nth-child(3) { animation-delay: 0.4s; }
+#dashboard.active .dash-card:nth-child(4) { animation-delay: 0.55s; }
+
+@keyframes dashEnter {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+.raise { border-left: 6px solid #ff4d4d; }
+.raised { border-left: 6px solid #ff0000; }
+.solved { border-left: 6px solid #b33c3c; }
+.discussion { border-left: 6px solid #ff1e1e; }
+
+/* ========== DEV PAGE ========== */
+.dev-page {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.dev-box {
+    padding: 50px;
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(12px);
+    border-radius: 18px;
+    color: white;
+    text-align: center;
+}
+
+/* ========== RAISE PROBLEM PAGE ========== */
+.raise-problem-page {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.raise-problem-box {
+    width: 400px;
+    padding: 30px;
+    border-radius: 18px;
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(12px);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.raise-problem-box input,
+.raise-problem-box textarea {
+    width: 100%;
+    padding: 10px;
+    border-radius: 6px;
+    border: none;
+}
+
+.raise-problem-box textarea {
+    resize: none;
+}
+
+.raise-problem-box button {
+    padding: 12px;
+    border-radius: 8px;
+    border: none;
+    font-weight: bold;
+    background: red;
+    color: white;
+    cursor: pointer;
+}
+
+/* CHANGE LABEL TO "Solution (Optional)" */
+#problemSolution::placeholder {
+    content: "Solution (Optional)";
+}
+
+/* ========== PROBLEM SUCCESS PAGE ========== */
+.problem-success-page {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.success-box {
+    padding: 40px;
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(12px);
+    border-radius: 18px;
+    color: white;
+    text-align: center;
+}
+
+.success-box button {
+    margin-top: 20px;
+    padding: 12px 20px;
+    border-radius: 8px;
+    border: none;
+    background: red;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* ========== RAISED PROBLEMS PAGE ========== */
+.raised-problems-page {
+    height: 100vh;
+    overflow-y: auto;
+    padding-top: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+}
+
+.problem-card {
+    width: 90%;
+    background: rgba(255,255,255,0.12);
+    border-radius: 12px;
+    padding: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    color: white;
+    position: relative;
+    transition: 0.3s;
+    box-shadow: 0 0 15px rgba(255,255,255,0.3);
+}
+
+.problem-card.glow-red { box-shadow: 0 0 25px red; }
+
+.problem-card .buttons {
+    display: flex;
+    gap: 8px;
+}
+.back-btn {
+    position: fixed;          /* stays visible on scroll */
+    bottom: 24px;
+    left: 24px;
+    z-index: 20;
+
+    padding: 12px 20px;
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,0.35);
+
+    background: rgba(255,255,255,0.18);
+    backdrop-filter: blur(10px);
+
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+
+    cursor: pointer;
+    transition: all 0.25s ease;
+}
+
+.back-btn:active {
+    transform: scale(0.95);
+}
+
+
+.back-btn:hover {
+    background: rgba(0,0,0,0.8);
+    transform: translate(-3px, -2px);
+    box-shadow: 0 10px 22px rgba(255,0,0,0.5);
+}
+
+
+.problem-card .buttons button {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+}
+
+.problem-card .counter {
+    position: absolute;
+    bottom: -10px;
+    right: 10px;
+    display: flex;
+    gap: 6px;
+    font-size: 0.85em;
+}
+
+/* ========== PROBLEM DETAIL PAGE ========== */
+.problem-detail-page {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.problem-detail-box {
+    width: 400px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 18px;
+    backdrop-filter: blur(12px);
+    padding: 20px;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
+}
+
+.problem-detail-box img {
+    max-width: 100%;
+    max-height: 200px;
+    border-radius: 12px;
+}
+/* ===== FIX: CHANGE PASSWORD MODAL BUG ===== */
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    display: none;
+    z-index: 50;
+}
+
+.change-password-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.9);
+    width: 360px;
+    padding: 30px;
+    border-radius: 18px;
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(12px);
+    color: white;
+    text-align: center;
+    z-index: 51;
+    display: none;
+    transition: 0.3s ease;
+}
+
+.change-password-modal.active {
+    display: block;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.change-password-modal input {
+    width: 100%;
+    padding: 12px;
+    margin: 8px 0;
+    border-radius: 8px;
+    border: none;
+}
+
+.change-password-modal button {
+    width: 100%;
+    padding: 12px;
+    background: red;
+    color: white;
+    border-radius: 8px;
+    border: none;
+    font-weight: bold;
+    margin-top: 12px;
+    cursor: pointer;
+}
+
+.modal-error {
+    margin-top: 8px;
+    color: #ffd6d6;
+}
+
+.modal-cancel {
+    margin-top: 10px;
+    cursor: pointer;
+    color: #ffd6d6;
+}
+
+
+</style>
+</head>
+<body>
+
+<div class="overlay"></div>
+<div class="hamburger" id="hamburger" onclick="toggleProfile()">☰</div>
+<div class="menu-overlay" id="menuOverlay" onclick="closeProfile()"></div>
+
+<!-- PROFILE PANEL -->
+<div class="profile-panel" id="profilePanel">
+    <div class="profile-pic" id="profilePicDiv" onclick="uploadPic()">👤
+        <img id="profileImage" style="display:none;">
+    </div>
+
+    <div class="display-name">
+        <span id="nameLabel">Display Name</span>
+        <span class="edit-icon" onclick="editName()">✏️</span>
+    </div>
+
+    <input id="nameInput" type="text"
+           placeholder="Enter display name"
+           onblur="saveName()"
+           onkeydown="if(event.key==='Enter') saveName()">
+
+    <hr>
+    <p id="profileEnroll">Enrollment</p>
+    <hr>
+
+    <div class="profile-option" onclick="go('dev')"> College Details</div>
+    <hr>
+
+    <div class="profile-option" onclick="openChangePassword()"> Change Password</div>
+    <hr>
+
+    <div class="profile-option" onclick="go('dev')"> Emergency contacts</div>
+    <hr>
+
+    <div class="logout" onclick="logout()">Logout</div>
+</div>
+
+<input type="file" id="fileInput" accept="image/*" hidden onchange="previewPic(this)">
+
+<div class="top-bar" id="topBar">
+    <button class="login-top" onclick="go('login')">Login</button>
+</div>
+
+<!-- HOME PAGE -->
+<div class="page active" id="home">
+    <div class="home-container">
+        <img src="National_Forensic_Sciences_University_Logo.png" class="logo">
+        <div class="nfsu-text">National Forensic Sciences University</div>
+        <div class="campus-text">Tripura Campus</div>
+        <div class="animated-text">Welcome to Grievance Portal</div>
+        <div class="about-website" onclick="go('dev')">💡 About Website</div>
+        <div class="facing-issue" onclick="go('dev')">Facing an Issue?</div>
+    </div>
+</div>
+
+<!-- LOGIN PAGE -->
+<div class="page" id="login">
+    <div class="login-page">
+        <div class="glass-box">
+            <h2>User Login</h2>
+            <input id="enrollInput" placeholder="Enrollment Number">
+            <input type="password" placeholder="Password">
+            <div class="forgot" onclick="go('dev')">Forgot password?</div>
+            <button onclick="login()">Login</button>
+            <div class="back" onclick="goBack()">← Back</div>
+        </div>
+    </div>
+</div>
+
+<!-- DASHBOARD PAGE -->
+<div class="page" id="dashboard">
+    <div class="dashboard-page">
+        <div class="dashboard-box">
+            <div class="dash-card raise" onclick="go('raiseProblem')"> Raise Problem</div>
+            <div class="dash-card raised" onclick="go('raisedProblems')"> Problems Raised</div>
+            <div class="dash-card solved" onclick="go('dev')"> Solved Problems</div>
+            <div class="dash-card discussion" onclick="go('dev')"> Discussion</div>
+        </div>
+    </div>
+</div>
+
+<!-- RAISE PROBLEM PAGE -->
+<div class="page" id="raiseProblem">
+    <div class="raise-problem-page">
+        <div class="raise-problem-box">
+            <h2> Raise Problem</h2>
+            <input id="problemSubject" placeholder="Related To">
+            <input type="file" id="problemImage">
+            <textarea id="problemDesc" placeholder="Description" rows="4"></textarea>
+            <textarea id="problemSolution" placeholder="Solution (Optional)" rows="3"></textarea>
+            <button onclick="submitProblem()">Submit</button>
+            <div class="back" onclick="go('dashboard')">← Back</div>
+        </div>
+    </div>
+</div>
+
+<!-- PROBLEM SUCCESS PAGE -->
+<div class="page" id="problemSuccess">
+    <div class="problem-success-page">
+        <div class="success-box">
+            <h2> Your problem is raised successfully</h2>
+            <button onclick="go('dashboard')">OK</button>
+        </div>
+    </div>
+</div>
+
+<!-- RAISED PROBLEMS PAGE -->
+<div class="page" id="raisedProblems">
+    <button class="back-btn" onclick="backToDashboard()">⬅ Back</button>
+    <div class="raised-problems-page" id="problemsContainer">
+        <!-- Problems will be dynamically inserted here -->
+    </div>
+</div>
+
+<!-- PROBLEM DETAIL PAGE -->
+<div class="page" id="problemDetail">
+    <div class="problem-detail-page">
+        <div class="problem-detail-box" id="problemDetailBox">
+            <h2 id="detailSubject"></h2>
+            <p id="detailDesc"></p>
+            <img id="detailImg" style="display:none;">
+            <div class="back" onclick="go('raisedProblems')">← Back</div>
+        </div>
+    </div>
+</div>
+
+<!-- DEV PAGE -->
+<div class="page" id="dev">
+    <div class="dev-page">
+        <div class="dev-box">
+            <h1>🚧 Under Development</h1>
+            <div class="back" onclick="goBack()">← Back</div>
+        </div>
+    </div>
+</div>
+
+<!-- CHANGE PASSWORD MODAL -->
+<div class="modal-overlay" id="passwordOverlay" onclick="closeChangePassword()"></div>
+<div class="change-password-modal" id="changePasswordModal">
+    <h2> Change Password</h2>
+    <input type="password" id="currentPassword" placeholder="Current Password">
+    <input type="password" id="newPassword" placeholder="New Password">
+    <input type="password" id="confirmPassword" placeholder="Confirm New Password">
+    <div class="modal-error" id="passwordError"></div>
+    <button onclick="savePassword()">Update Password</button>
+    <div class="modal-cancel" onclick="closeChangePassword()">Cancel</div>
+</div>
+
+<script>
+let historyStack = [];
+let problems = []; // Array to store problems
+
+function go(page) {
+    const current = document.querySelector(".page.active").id;
+    historyStack.push(current);
+
+    document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+    document.getElementById(page).classList.add("active");
+
+    document.getElementById("topBar").style.display = page === "home" ? "block" : "none";
+    document.getElementById("hamburger").style.display = page === "dashboard" ? "block" : "none";
+
+    closeProfile();
+
+    if(page==='raisedProblems') renderProblems();
+}
+
+function goBack() {
+    if (!historyStack.length) return;
+    const prev = historyStack.pop();
+
+    document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+    document.getElementById(prev).classList.add("active");
+
+    document.getElementById("topBar").style.display = prev === "home" ? "block" : "none";
+    document.getElementById("hamburger").style.display = prev === "dashboard" ? "block" : "none";
+
+    closeProfile();
+}
+function backToDashboard() {
+    // Do NOT push history
+    document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+    document.getElementById("dashboard").classList.add("active");
+
+    document.getElementById("topBar").style.display = "none";
+    document.getElementById("hamburger").style.display = "block";
+
+    closeProfile();
+}
+
+
+function login() {
+    const enroll = document.getElementById("enrollInput").value;
+    document.getElementById("profileEnroll").innerText = enroll || "Enrollment";
+    go("dashboard");
+}
+
+function logout() {
+    historyStack = [];
+    closeProfile();
+    go("home");
+}
+
+function toggleProfile() {
+    const panel = document.getElementById("profilePanel");
+    const overlay = document.getElementById("menuOverlay");
+    panel.classList.toggle("active");
+    overlay.style.display = panel.classList.contains("active") ? "block" : "none";
+}
+
+function closeProfile() {
+    document.getElementById("profilePanel").classList.remove("active");
+    document.getElementById("menuOverlay").style.display = "none";
+}
+
+function uploadPic() { document.getElementById("fileInput").click(); }
+function previewPic(input) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = e => {
+            const img = document.getElementById("profileImage");
+            img.src = e.target.result; img.style.display = "block";
+            document.getElementById("profilePicDiv").innerText = "";
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+function editName() { document.getElementById("nameInput").style.display = "block"; document.getElementById("nameInput").focus(); }
+function saveName() {
+    const input = document.getElementById("nameInput");
+    if (input.value.trim() !== "") document.getElementById("nameLabel").innerText = input.value;
+    input.value=""; input.style.display="none";
+}
+
+/* CHANGE PASSWORD LOGIC */
+function openChangePassword() {
+    closeProfile();
+    document.getElementById("passwordOverlay").style.display = "block";
+    document.getElementById("changePasswordModal").classList.add("active");
+}
+
+function closeChangePassword() {
+    document.getElementById("passwordOverlay").style.display = "none";
+    document.getElementById("changePasswordModal").classList.remove("active");
+    currentPassword.value=""; newPassword.value=""; confirmPassword.value=""; passwordError.innerText="";
+}
+
+function savePassword() {
+    if (!currentPassword.value || !newPassword.value || !confirmPassword.value) {
+        passwordError.innerText="All fields are required"; return;
+    }
+    if (newPassword.value!==confirmPassword.value){ passwordError.innerText="Passwords do not match"; return; }
+    passwordError.innerText=" Password updated successfully";
+    setTimeout(closeChangePassword,1200);
+}
+
+/* RAISE PROBLEM LOGIC */
+function submitProblem() {
+    const subject = document.getElementById("problemSubject").value.trim();
+    const desc = document.getElementById("problemDesc").value.trim();
+    if(!subject || !desc){ alert("Subject and Description are required"); return; }
+    const img = document.getElementById("problemImage").files[0];
+    const solution = document.getElementById("problemSolution").value.trim();
+    const reader = new FileReader();
+
+    reader.onload = e => {
+        problems.push({subject, desc, solution, imgSrc: e.target.result, correct:0, wrong:0});
+        go("problemSuccess");
+    };
+    if(img){ reader.readAsDataURL(img); }
+    else{ problems.push({subject, desc, solution, imgSrc:null, correct:0, wrong:0}); go("problemSuccess"); }
+
+    // Reset fields
+    document.getElementById("problemSubject").value="";
+    document.getElementById("problemDesc").value="";
+    document.getElementById("problemSolution").value="";
+    document.getElementById("problemImage").value="";
+}
+
+/* RENDER PROBLEMS */
+function renderProblems() {
+    const container = document.getElementById("problemsContainer");
+    container.innerHTML="";
+    problems.sort((a,b)=>b.correct - a.correct); // More correct on top
+
+    problems.forEach((p,index)=>{
+        const card = document.createElement("div");
+        card.className="problem-card "+(index===0 ? "glow-red" : "");
+        card.innerHTML=`
+            <span>${p.subject}</span>
+            <div class="buttons">
+                <button onclick="vote(event, ${index}, true)">✅</button>
+                <button onclick="vote(event, ${index}, false)">❌</button>
+            </div>
+            <div class="counter">✅${p.correct} ❌${p.wrong}</div>
+        `;
+        card.onclick = ()=>showDetail(index);
+        container.appendChild(card);
+    });
+}
+
+/* VOTE */
+function vote(e,index,isCorrect){
+    e.stopPropagation();
+    if(isCorrect) problems[index].correct++; else problems[index].wrong++;
+    renderProblems();
+}
+
+/* SHOW DETAIL */
+function showDetail(index){
+    const p=problems[index];
+    document.getElementById("detailSubject").innerText=p.subject;
+    document.getElementById("detailDesc").innerText=p.desc;
+    const imgEl=document.getElementById("detailImg");
+    if(p.imgSrc){ imgEl.src=p.imgSrc; imgEl.style.display="block"; } 
+    else imgEl.style.display="none";
+    go('problemDetail');
+}
+</script>
+</body>
+</html>
